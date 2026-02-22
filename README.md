@@ -2,6 +2,8 @@
 
 An enterprise-grade platform for automating call QA and compliance audits using local ML models.
 
+This repo is a submission for the **Auditor task** (Lendkraft / Thevertical.ai).
+
 ---
 
 ## Demo
@@ -12,17 +14,11 @@ An enterprise-grade platform for automating call QA and compliance audits using 
 
 ## Screenshots
 
-| Dashboard | Call detail | Upload |
-|-----------|-------------|--------|
-| *(Add `docs/screenshots/dashboard.png`)* | *(Add `docs/screenshots/call-detail.png`)* | *(Add `docs/screenshots/upload.png`)* |
-
-Add your screenshots under `docs/screenshots/` and reference them here, for example:
-
-```markdown
 ![Dashboard](docs/screenshots/dashboard.png)
+
 ![Call detail](docs/screenshots/call-detail.png)
+
 ![Upload](docs/screenshots/upload.png)
-```
 
 ---
 
@@ -124,4 +120,4 @@ helm install audit-ai ./audit-ai
 
 ## License
 
-Enterprise - All rights reserved.
+MIT License. See [LICENSE](LICENSE) for details.
