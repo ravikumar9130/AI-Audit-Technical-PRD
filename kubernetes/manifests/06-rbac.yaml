@@ -1,0 +1,60 @@
+# Service Account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: auditai-sa
+  namespace: auditai
+---
+# Role for secret access
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: auditai-secret-reader
+  namespace: auditai
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list"]
+---
+# RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: auditai-secret-reader-binding
+  namespace: auditai
+subjects:
+- kind: ServiceAccount
+  name: auditai-sa
+  namespace: auditai
+roleRef:
+  kind: Role
+  name: auditai-secret-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+# Pod Security Policy (if using older k8s) or Pod Security Standards
+# This applies restricted pod security standards
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: auditai-restricted
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+  - ALL
+  volumes:
+  - 'configMap'
+  - 'emptyDir'
+  - 'projected'
+  - 'secret'
+  - 'downwardAPI'
+  - 'persistentVolumeClaim'
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  seLinux:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'RunAsAny'

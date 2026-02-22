@@ -1,0 +1,61 @@
+# Namespace for Audit AI
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: auditai
+  labels:
+    name: auditai
+    environment: production
+---
+# ConfigMap for non-sensitive configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auditai-config
+  namespace: auditai
+data:
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "INFO"
+  DEBUG: "false"
+  AUDIO_SAMPLE_RATE: "16000"
+  AUDIO_CHANNELS: "1"
+  AUDIO_FORMAT: "pcm_s16le"
+  VAD_CONFIDENCE_THRESHOLD: "0.5"
+  VAD_HANGOVER_MS: "250"
+  JWT_ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+  REFRESH_TOKEN_EXPIRE_DAYS: "7"
+  VLLM_GPU_MEMORY_UTILIZATION: "0.85"
+  VLLM_MAX_MODEL_LEN: "4096"
+  VLLM_TENSOR_PARALLEL_SIZE: "1"
+  LLM_TEMPERATURE: "0.1"
+  LLM_MAX_TOKENS: "2048"
+  LLM_TOP_P: "0.9"
+  ENABLE_AUDIT_LOGGING: "true"
+  AUDIT_LOG_RETENTION_DAYS: "2555"
+  DATA_RETENTION_DAYS: "2555"
+  PII_REDACTION_ENABLED: "true"
+  RATE_LIMIT_UPLOADS_PER_MINUTE: "10"
+  RATE_LIMIT_API_CALLS_PER_MINUTE: "100"
+  WS_HEARTBEAT_INTERVAL: "30"
+  WS_MAX_CONNECTIONS: "1000"
+  PROMETHEUS_ENABLED: "true"
+---
+# Secret for sensitive configuration
+apiVersion: v1
+kind: Secret
+metadata:
+  name: auditai-secrets
+  namespace: auditai
+type: Opaque
+stringData:
+  DATABASE_URL: "postgresql://auditai:CHANGE_ME@postgres-service:5432/auditai"
+  REDIS_URL: "redis://redis-service:6379/0"
+  JWT_SECRET: "CHANGE_ME_MIN_32_CHARS_LONG_SECRET_KEY"
+  ENCRYPTION_KEY: "CHANGE_ME_MIN_32_CHARS_LONG_ENCRYPT"
+  MINIO_ENDPOINT: "minio-service:9000"
+  MINIO_ACCESS_KEY: "CHANGE_ME"
+  MINIO_SECRET_KEY: "CHANGE_ME"
+  MINIO_BUCKET: "auditai-calls"
+  MINIO_SECURE: "false"
+  SENTRY_DSN: ""

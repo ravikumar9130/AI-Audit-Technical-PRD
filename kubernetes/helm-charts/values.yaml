@@ -1,0 +1,183 @@
+# Default values for audit-ai.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount:
+  api: 3
+  frontend: 3
+  worker: 2
+
+image:
+  repository: auditai
+  tag: latest
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  api:
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+  frontend:
+    type: ClusterIP
+    port: 80
+    targetPort: 3000
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+  hosts:
+    - host: app.auditai.io
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+    - host: api.auditai.io
+      paths:
+        - path: /
+          pathType: Prefix
+          service: api
+  tls:
+    - secretName: auditai-tls
+      hosts:
+        - app.auditai.io
+        - api.auditai.io
+
+resources:
+  api:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  frontend:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  worker:
+    requests:
+      memory: "8Gi"
+      cpu: "2000m"
+      nvidia.com/gpu: 1
+    limits:
+      memory: "16Gi"
+      cpu: "4000m"
+      nvidia.com/gpu: 1
+
+autoscaling:
+  api:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  frontend:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  worker:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetQueueLength: 10
+
+nodeSelector:
+  worker:
+    accelerator: nvidia-gpu
+
+tolerations: []
+
+affinity: {}
+
+# Database configuration
+postgresql:
+  enabled: true
+  auth:
+    username: auditai
+    password: changeme
+    database: auditai
+  primary:
+    persistence:
+      enabled: true
+      size: 100Gi
+
+redis:
+  enabled: true
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 10Gi
+
+minio:
+  enabled: true
+  auth:
+    rootUser: minioadmin
+    rootPassword: minioadmin
+  persistence:
+    enabled: true
+    size: 500Gi
+
+# Application configuration
+config:
+  environment: production
+  logLevel: INFO
+  jwt:
+    algorithm: HS256
+    accessTokenExpireMinutes: 30
+    refreshTokenExpireDays: 7
+  audio:
+    sampleRate: 16000
+    channels: 1
+    format: pcm_s16le
+  vad:
+    confidenceThreshold: 0.5
+    hangoverMs: 250
+  llm:
+    temperature: 0.1
+    maxTokens: 2048
+    topP: 0.9
+  security:
+    enableAuditLogging: true
+    auditLogRetentionDays: 2555
+    dataRetentionDays: 2555
+    piiRedactionEnabled: true
+  rateLimit:
+    uploadsPerMinute: 10
+    apiCallsPerMinute: 100
+
+# Secrets (override in production)
+secrets:
+  jwtSecret: "change-me-min-32-chars-long-secret-key"
+  encryptionKey: "change-me-min-32-chars-encryption"

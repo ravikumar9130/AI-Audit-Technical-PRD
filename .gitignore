@@ -1,0 +1,105 @@
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.nuxt
+.cache
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# IDE and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Logs and temp
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.temp
+.temp/
+
+# ML models and caches (large binaries / downloads)
+ml-models/*.gguf
+ml-models/*.bin
+ml-models/*.safetensors
+ml-models/.cache/
+
+# Docker
+.docker/
+
+# Helm / K8s (optional: ignore rendered manifests if you generate them)
+# *.rendered.yaml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local development
+*.local
+.vercel
+
+# Stray / accidental files
+=

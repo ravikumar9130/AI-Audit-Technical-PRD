@@ -1,0 +1,263 @@
+# FastAPI Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auditai-api
+  namespace: auditai
+  labels:
+    app: auditai-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: auditai-api
+  template:
+    metadata:
+      labels:
+        app: auditai-api
+    spec:
+      containers:
+      - name: api
+        image: auditai/api:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        envFrom:
+        - configMapRef:
+            name: auditai-config
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: DATABASE_URL
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: REDIS_URL
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: JWT_SECRET
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: ENCRYPTION_KEY
+        - name: MINIO_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: MINIO_ENDPOINT
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: MINIO_ACCESS_KEY
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: MINIO_SECRET_KEY
+        - name: MINIO_BUCKET
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: MINIO_BUCKET
+        - name: MINIO_SECURE
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: MINIO_SECURE
+        - name: SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: SENTRY_DSN
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+# FastAPI Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: auditai-api-service
+  namespace: auditai
+spec:
+  selector:
+    app: auditai-api
+  ports:
+  - port: 80
+    targetPort: 8000
+  type: ClusterIP
+---
+# Celery Worker Deployment (GPU-enabled)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auditai-worker
+  namespace: auditai
+  labels:
+    app: auditai-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: auditai-worker
+  template:
+    metadata:
+      labels:
+        app: auditai-worker
+    spec:
+      nodeSelector:
+        accelerator: nvidia-gpu
+      containers:
+      - name: worker
+        image: auditai/worker:latest
+        envFrom:
+        - configMapRef:
+            name: auditai-config
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: DATABASE_URL
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: REDIS_URL
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: JWT_SECRET
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: ENCRYPTION_KEY
+        - name: MINIO_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: MINIO_ENDPOINT
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: MINIO_ACCESS_KEY
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: MINIO_SECRET_KEY
+        - name: MINIO_BUCKET
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: MINIO_BUCKET
+        - name: MINIO_SECURE
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: MINIO_SECURE
+        resources:
+          requests:
+            memory: "8Gi"
+            cpu: "2000m"
+            nvidia.com/gpu: 1
+          limits:
+            memory: "16Gi"
+            cpu: "4000m"
+            nvidia.com/gpu: 1
+        volumeMounts:
+        - name: model-storage
+          mountPath: /app/models
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: model-storage-pvc
+---
+# Celery Beat Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auditai-beat
+  namespace: auditai
+  labels:
+    app: auditai-beat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auditai-beat
+  template:
+    metadata:
+      labels:
+        app: auditai-beat
+    spec:
+      containers:
+      - name: beat
+        image: auditai/worker:latest
+        command: ["celery", "-A", "workers.celery_app", "beat", "--loglevel=info"]
+        envFrom:
+        - configMapRef:
+            name: auditai-config
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: DATABASE_URL
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: REDIS_URL
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: auditai-secrets
+              key: JWT_SECRET
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+---
+# Model Storage PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: model-storage-pvc
+  namespace: auditai
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: fast-ssd

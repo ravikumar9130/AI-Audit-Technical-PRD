@@ -1,0 +1,18 @@
+apiVersion: v2
+name: audit-ai
+description: A Helm chart for Audit AI - Enterprise Speech Intelligence Platform
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - speech-intelligence
+  - call-qa
+  - compliance
+  - ai
+  - ml
+home: https://auditai.io
+sources:
+  - https://github.com/auditai/audit-ai
+maintainers:
+  - name: Audit AI Team
+    email: team@auditai.io
