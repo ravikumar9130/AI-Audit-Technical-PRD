@@ -2,8 +2,6 @@
 
 An enterprise-grade platform for automating call QA and compliance audits using local ML models.
 
-This repo is a submission for the **Auditor task** (Lendkraft / Thevertical.ai).
-
 ---
 
 ## Demo
