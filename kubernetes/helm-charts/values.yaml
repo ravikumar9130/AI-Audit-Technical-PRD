@@ -181,3 +181,4 @@ config:
 secrets:
   jwtSecret: "change-me-min-32-chars-long-secret-key"
   encryptionKey: "change-me-min-32-chars-encryption"
+

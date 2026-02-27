@@ -102,7 +102,6 @@ class StorageService:
         except ClientError:
             return False
 
-
 # Singleton instance
 _storage_service: Optional[StorageService] = None
 

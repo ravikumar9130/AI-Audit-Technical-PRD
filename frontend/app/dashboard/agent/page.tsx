@@ -54,6 +54,7 @@ interface DashboardData {
   trend_data: Array<{ date: string; call_count: number; avg_score: number }>;
 }
 
+
 interface CoachingHint {
   callId: number;
   recommendation: string;

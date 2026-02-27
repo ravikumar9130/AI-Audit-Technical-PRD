@@ -328,6 +328,7 @@ INSERT INTO scoring_templates (
     '{"CQS": 0.25, "ECS": 0.25, "PHS": 0.20, "DIS": 0.15, "ROS": 0.15}'::jsonb
 );
 
+
 INSERT INTO scoring_templates (
     name, vertical, system_prompt, user_prompt_template, json_schema, scoring_weights
 ) VALUES (
