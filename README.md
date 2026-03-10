@@ -4,12 +4,6 @@ An enterprise-grade platform for automating call QA and compliance audits using 
 
 ---
 
-## Demo
-
-**Watch the demo video:** [audit-ai-demo.mp4 (Google Drive)](https://drive.google.com/file/d/1KqasUYzBEYpJw_UW8xpGrVHEuPdevuwr/view?usp=sharing)
-
----
-
 ## Screenshots
 
 ![Dashboard](docs/screenshots/dashboard.png)
